@@ -1,7 +1,7 @@
 'use strict';
 
 document.getElementById('year').textContent = new Date().getFullYear();
-const menuLinks = [...document.querySelectorAll('nav a')];
+const menuLinks = [...document.querySelectorAll('.header-inner nav a, .section-directory a')];
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 if ('IntersectionObserver' in window) {
