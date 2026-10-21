@@ -23,3 +23,7 @@ GitHub profilimdeki siyah, yeşil ve terminal temasından esinlenen Türkçe ki�
 - Menüde bölüm vurgusu ve otomatik yıl: `script.js`
 
 Tanıtım terminali ve proje görselleri ilgili GitHub README dosyalarındaki özgün varlıklardır; `assets/` altında yerel olarak saklanır. Terminaldeki istatistikler görselin oluşturulduğu anı gösterir. REPORA görseli, README dosyasındaki terminal ekran görüntüsüdür. Hareketi azaltmayı tercih edenlerde GIF yerine sabit kare gösterilir. Form veya sunucu gerektiren özellik bulunmaz. Bağlantılar doğrudan GitHub ve LinkedIn profillerine gider.
+
+## Arayüz özellikleri
+
+Projeler Analiz, Gizlilik ve Kod güvenliği alanlarına göre filtrelenebilir. Tanıtım terminalindeki düğme, sitedeki animasyonları durdurur veya yeniden başlatır. İşletim sisteminin hareketi azalt tercihi otomatik olarak uygulanır. JavaScript kapalıyken tüm projeler ve gezinme bağlantıları kullanılabilir.

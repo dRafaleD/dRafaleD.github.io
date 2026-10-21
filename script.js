@@ -48,3 +48,55 @@ window.addEventListener('scroll', updateReadingProgress, { passive: true });
 window.addEventListener('resize', updateReadingProgress);
 window.addEventListener('load', updateReadingProgress);
 updateReadingProgress();
+
+// Filters work locally; every project remains available without JavaScript.
+const projectCards = [...document.querySelectorAll('.project-card')];
+const projectGrid = document.querySelector('.project-grid');
+const filterButtons = [...document.querySelectorAll('[data-filter]')];
+filterButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const filter = button.dataset.filter;
+    let count = 0;
+    filterButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    projectGrid.classList.toggle('is-filtered', filter !== 'all');
+    projectCards.forEach(card => {
+      const visible = filter === 'all' || card.dataset.category === filter;
+      card.hidden = !visible;
+      card.classList.remove('filter-enter');
+      if (visible) {
+        count++;
+        card.classList.add('is-visible');
+      }
+    });
+    requestAnimationFrame(() => {
+      projectCards.filter(card => !card.hidden).forEach(card => card.classList.add('filter-enter'));
+      updateReadingProgress();
+    });
+    document.querySelector('.filter-count').textContent = `${count} proje`;
+  });
+});
+document.querySelector('.project-toolbar').hidden = false;
+
+// Respect the OS preference and offer an explicit pause for both original GIFs.
+const motionToggle = document.querySelector('.motion-toggle');
+const animatedImages = [...document.querySelectorAll('img[data-animated]')];
+let manuallyPaused = false;
+function applyMotionPreference() {
+  const paused = manuallyPaused || motionPreference.matches;
+  document.body.classList.toggle('motion-paused', paused);
+  animatedImages.forEach(image => {
+    const nextSource = paused ? image.dataset.still : image.dataset.animated;
+    if (image.getAttribute('src') !== nextSource) image.src = nextSource;
+  });
+  motionToggle.hidden = motionPreference.matches;
+  motionToggle.setAttribute('aria-pressed', String(paused));
+  motionToggle.innerHTML = paused
+    ? '<span aria-hidden="true">▷</span> Animasyonu oynat'
+    : '<span aria-hidden="true">Ⅱ</span> Animasyonu durdur';
+}
+motionToggle.addEventListener('click', () => {
+  manuallyPaused = !manuallyPaused;
+  applyMotionPreference();
+});
+motionPreference.addEventListener('change', applyMotionPreference);
+applyMotionPreference();
