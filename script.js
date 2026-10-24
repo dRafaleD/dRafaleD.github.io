@@ -74,9 +74,15 @@ filterButtons.forEach(button => {
       projectCards.filter(card => !card.hidden).forEach(card => card.classList.add('filter-enter'));
       updateReadingProgress();
     });
-    document.querySelector('.filter-count').textContent = `${count} proje`;
+    visibleProjects = count;
+    updateProjectCount();
   });
 });
+let visibleProjects = projectCards.length;
+function updateProjectCount() {
+  const { t } = window.siteI18n;
+  document.querySelector('.filter-count').textContent = visibleProjects === 1 ? t('count.one') : t('count.many', { n: visibleProjects });
+}
 document.querySelector('.project-toolbar').hidden = false;
 
 // Cards light up under the pointer.
@@ -248,14 +254,44 @@ function applyMotionPreference() {
   });
   motionToggle.hidden = motionPreference.matches;
   motionToggle.setAttribute('aria-pressed', String(paused));
-  motionToggle.innerHTML = paused
-    ? '<span aria-hidden="true">▷</span> Animasyonu oynat'
-    : '<span aria-hidden="true">Ⅱ</span> Animasyonu durdur';
+  motionToggle.innerHTML = window.siteI18n.t(paused ? 'motion.play' : 'motion.pause');
+  syncMascot();
 }
 motionToggle.addEventListener('click', () => {
   manuallyPaused = !manuallyPaused;
   applyMotionPreference();
 });
+// The mascot video plays only while it is on screen and motion is allowed.
+const mascot = document.querySelector('.mascot-video');
+let mascotVisible = false;
+function syncMascot() {
+  const shouldPlay = mascotVisible && !document.hidden && !manuallyPaused && !motionPreference.matches;
+  if (shouldPlay) mascot.play().catch(() => {});
+  else mascot.pause();
+}
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([entry]) => {
+    mascotVisible = entry.isIntersecting;
+    syncMascot();
+  }, { threshold: 0.15 }).observe(mascot);
+}
+
 motionPreference.addEventListener('change', applyMotionPreference);
 document.addEventListener('visibilitychange', applyMotionPreference);
 applyMotionPreference();
+updateProjectCount();
+
+// Language changes: refresh JS-written text and sweep a scan line across the page.
+window.addEventListener('langchange', () => {
+  updateProjectCount();
+  applyMotionPreference();
+});
+const wipe = document.createElement('div');
+wipe.className = 'lang-wipe';
+wipe.setAttribute('aria-hidden', 'true');
+document.body.append(wipe);
+window.addEventListener('langwipe', () => {
+  wipe.classList.remove('is-running');
+  void wipe.offsetWidth;
+  wipe.classList.add('is-running');
+});
