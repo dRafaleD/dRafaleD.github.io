@@ -15,7 +15,7 @@ if ('IntersectionObserver' in window) {
       }
     }, { rootMargin: '0px 0px -30px 0px', threshold: 0.04 });
 
-    document.querySelectorAll('.section-label, .section-heading, .about-grid > div, .skill-card, .project-card, .contact-grid').forEach(element => {
+    document.querySelectorAll('.section-label, .section-heading, .about-grid > div, .skill-card, .project-card, .repo-card, .contact-grid').forEach(element => {
       element.classList.add('reveal');
       revealObserver.observe(element);
     });
@@ -96,87 +96,144 @@ for (const item of [...marqueeTrack.children]) {
   marqueeTrack.append(copy);
 }
 
-// Background terminal: a quiet, endless stream of analysis output.
-const bgTerminal = document.querySelector('.bg-terminal');
-const terminalScript = [
-  ['$ asphdex scan ./samples/invoice_2024.exe', ''],
-  ['[*] PE32+ executable, 6 sections', 'dim'],
-  ['[*] entropy .text=6.41 .rsrc=7.92', 'dim'],
-  ['[!] packed section detected: .rsrc (UPX)', 'warn'],
-  ['[+] yara: Suspicious_Imports_Injection matched', ''],
-  ['[+] imports: VirtualAllocEx, WriteProcessMemory', 'dim'],
-  ['[✓] report written to ./reports/invoice_2024.json', ''],
-  ['', ''],
-  ['$ repora audit ~/projects/api --secrets', ''],
-  ['[*] walking 1,284 files', 'dim'],
-  ['[!] .env.production committed in 3f2a91c', 'warn'],
-  ['[!] hardcoded token pattern in config/db.ts:14', 'warn'],
-  ['[✓] 2 findings, 0 critical', ''],
-  ['', ''],
-  ['$ fhnix inspect ./mail/urgent_payment.eml', ''],
-  ['[*] SPF=fail DKIM=none DMARC=reject', 'dim'],
-  ['[!] reply-to domain differs from sender', 'warn'],
-  ['[!] link text ≠ href: paypa1-secure.example', 'warn'],
-  ['[✓] verdict: phishing (score 0.94)', ''],
-  ['', ''],
-  ['$ trackher footprint --self --passive', ''],
-  ['[*] querying 42 public sources', 'dim'],
-  ['[+] 7 accounts linked to handle', ''],
-  ['[✓] privacy report generated', ''],
-  ['', ''],
-  ['$ banshee triage ./logs/auth.log --offline', ''],
-  ['[*] parsed 18,331 lines', 'dim'],
-  ['[!] 214 failed ssh logins from 3 addresses', 'warn'],
-  ['[✓] evidence bundle sealed: sha256 9c1e…a07b', ''],
-  ['', ''],
-  ['$ sudo ufw status verbose', ''],
-  ['Status: active · Default: deny (incoming)', 'dim'],
-  ['', ''],
+// Background terminal: an endless, softly blurred stream of analysis output.
+const terminalTrack = document.querySelector('.bg-terminal-track');
+const terminalSessions = [
+  ['asphdex scan ./samples/invoice_2024.exe', [
+    ['dim', '[*] PE32+ executable, 6 sections, 214 imports'],
+    ['dim', '[*] entropy  .text=6.41  .rdata=5.02  .rsrc=7.92'],
+    ['warn', '[!] packed section detected: .rsrc (UPX 3.96)'],
+    ['', '[+] yara: Suspicious_Imports_Injection matched'],
+    ['dim', '[+] imports: VirtualAllocEx, WriteProcessMemory, CreateRemoteThread'],
+    ['', '[✓] report written to ./reports/invoice_2024.json'],
+  ]],
+  ['repora audit ~/projects/api --secrets --history', [
+    ['dim', '[*] walking 1,284 files, 612 commits'],
+    ['warn', '[!] .env.production committed in 3f2a91c'],
+    ['warn', '[!] hardcoded token pattern in config/db.ts:14'],
+    ['dim', '[*] dependency review: 3 outdated, 0 known-vulnerable'],
+    ['', '[✓] 2 findings, 0 critical'],
+  ]],
+  ['fhnix inspect ./mail/urgent_payment.eml', [
+    ['dim', '[*] SPF=fail  DKIM=none  DMARC=reject'],
+    ['warn', '[!] reply-to domain differs from sender'],
+    ['warn', '[!] link text ≠ href: paypa1-secure.example'],
+    ['', '[✓] verdict: phishing (score 0.94)'],
+  ]],
+  ['trackher footprint --self --passive', [
+    ['dim', '[*] querying 42 public sources'],
+    ['', '[+] 7 accounts linked to handle'],
+    ['warn', '[!] email exposed in 2 public breach notices'],
+    ['', '[✓] privacy report generated'],
+  ]],
+  ['banshee triage ./logs/auth.log --offline', [
+    ['dim', '[*] parsed 18,331 lines'],
+    ['warn', '[!] 214 failed ssh logins from 3 addresses'],
+    ['', '[✓] evidence bundle sealed: sha256 9c1e…a07b'],
+  ]],
+  ['ravenscanner triage ./downloads/', [
+    ['dim', '[*] 37 files · 4 ELF · 2 scripts · 1 archive'],
+    ['warn', '[!] setup.sh: curl | sh pattern, base64 blob'],
+    ['', '[✓] 1 file flagged for manual review'],
+  ]],
+  ['stracespy summarize ./traces/app.strace', [
+    ['dim', '[*] 9,412 syscalls · 3 processes'],
+    ['warn', '[!] reads /etc/shadow (EACCES)'],
+    ['', '[+] outbound connect → 10.0.4.12:4444'],
+    ['', '[✓] behavior summary saved'],
+  ]],
+  ['sentinel timeline /mnt/evidence/disk.img', [
+    ['dim', '[*] MACB timeline: 48,201 entries'],
+    ['warn', '[!] mtime < crtime on /usr/bin/sshd'],
+    ['', '[✓] timeline.csv exported'],
+  ]],
+  ['flowscope analyze ./captures/lab.pcapng', [
+    ['dim', '[*] 12,880 packets · 214 flows'],
+    ['', '[+] TLS JA3 fingerprints: 9 unique'],
+    ['warn', '[!] beacon-like interval 60s ±2s → 203.0.113.7'],
+    ['', '[✓] risk score: 41 / 100'],
+  ]],
+  ['yara -r ./rules/asphdex ./samples', [
+    ['', 'Packer_UPX_Generic     ./samples/invoice_2024.exe'],
+    ['', 'Susp_PowerShell_Enc    ./samples/update.ps1'],
+  ]],
+  ['npiac build --out context.md', [
+    ['dim', '[*] 312 files indexed · 41k tokens'],
+    ['', '[✓] deterministic context written'],
+  ]],
+  ['sudo ufw status verbose', [
+    ['dim', 'Status: active'],
+    ['dim', 'Default: deny (incoming), allow (outgoing)'],
+  ]],
 ];
-const maxTerminalLines = 40;
-let terminalTimer = 0;
-let terminalIndex = 0;
-function terminalLine([text, kind]) {
+function terminalLine(kind, text) {
   const line = document.createElement('div');
-  line.textContent = text || ' ';
   if (kind) line.className = kind;
+  line.textContent = text;
   return line;
 }
-function fillTerminal() {
-  bgTerminal.replaceChildren(...Array.from({ length: maxTerminalLines }, (_, i) => terminalLine(terminalScript[i % terminalScript.length])));
-  terminalIndex = maxTerminalLines % terminalScript.length;
+function buildTerminal() {
+  const fragment = document.createDocumentFragment();
+  let lines = 0;
+  for (const [command, output] of terminalSessions) {
+    const prompt = terminalLine('cmd', ` ${command}`);
+    const user = document.createElement('b');
+    user.textContent = 'root@drafaled:~/lab$';
+    prompt.prepend(user);
+    fragment.append(prompt);
+    output.forEach(([kind, text]) => fragment.append(terminalLine(kind, text)));
+    fragment.append(terminalLine('', ' '));
+    lines += output.length + 2;
+  }
+  // Two identical copies let the CSS animation loop without a visible seam.
+  terminalTrack.append(fragment.cloneNode(true), fragment);
+  terminalTrack.style.setProperty('--term-duration', `${lines * 1.7}s`);
 }
-function typeNextLine() {
-  const [rawText, kind] = terminalScript[terminalIndex];
-  const text = rawText || ' ';
-  terminalIndex = (terminalIndex + 1) % terminalScript.length;
-  const line = document.createElement('div');
-  if (kind) line.className = kind;
-  const output = document.createTextNode('');
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor';
-  line.append(output, cursor);
-  bgTerminal.querySelector('.cursor')?.remove();
-  bgTerminal.append(line);
-  while (bgTerminal.childElementCount > maxTerminalLines) bgTerminal.firstElementChild.remove();
-  let typed = 0;
-  const step = () => {
-    if (typed >= text.length) {
-      terminalTimer = setTimeout(typeNextLine, text.startsWith('$') ? 700 : 260);
-      return;
+buildTerminal();
+
+// Short glitch bursts every few seconds; the name joins in now and then.
+let glitchTimer = 0;
+function scheduleGlitch() {
+  clearTimeout(glitchTimer);
+  glitchTimer = setTimeout(() => {
+    if (!document.body.classList.contains('motion-paused') && !document.hidden) {
+      const withName = Math.random() < 0.35;
+      document.body.classList.add('is-glitching');
+      document.body.classList.toggle('glitch-name', withName);
+      setTimeout(() => document.body.classList.remove('is-glitching', 'glitch-name'), 450);
     }
-    // Commands are typed key by key, output lands in quick bursts.
-    typed = Math.min(text.length, typed + (text.startsWith('$') ? 1 : 6));
-    output.textContent = text.slice(0, typed);
-    terminalTimer = setTimeout(step, text.startsWith('$') ? 45 : 18);
-  };
-  step();
+    scheduleGlitch();
+  }, 3500 + Math.random() * 5000);
 }
-function setTerminalRunning(running) {
-  clearTimeout(terminalTimer);
-  if (running) typeNextLine();
-}
-fillTerminal();
+scheduleGlitch();
+
+// A soft light follows the pointer across the background.
+const cursorGlow = document.querySelector('.cursor-glow');
+window.addEventListener('pointermove', event => {
+  cursorGlow.style.setProperty('--cx', `${event.clientX}px`);
+  cursorGlow.style.setProperty('--cy', `${event.clientY}px`);
+}, { passive: true });
+
+// Repository filters, same behaviour as the featured project filters.
+const repoCards = [...document.querySelectorAll('.repo-card')];
+const repoButtons = [...document.querySelectorAll('[data-repo-filter]')];
+repoButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const filter = button.dataset.repoFilter;
+    repoButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    repoCards.forEach(card => {
+      const visible = filter === 'all' || card.dataset.group === filter;
+      card.hidden = !visible;
+      card.classList.remove('filter-enter');
+      if (visible) card.classList.add('is-visible');
+    });
+    requestAnimationFrame(() => {
+      repoCards.filter(card => !card.hidden).forEach(card => card.classList.add('filter-enter'));
+      updateReadingProgress();
+    });
+  });
+});
+document.querySelector('.repo-toolbar').hidden = false;
 
 // Respect the OS preference and offer an explicit pause for both original GIFs.
 const motionToggle = document.querySelector('.motion-toggle');
@@ -189,7 +246,6 @@ function applyMotionPreference() {
     const nextSource = paused ? image.dataset.still : image.dataset.animated;
     if (image.getAttribute('src') !== nextSource) image.src = nextSource;
   });
-  setTerminalRunning(!paused && !document.hidden);
   motionToggle.hidden = motionPreference.matches;
   motionToggle.setAttribute('aria-pressed', String(paused));
   motionToggle.innerHTML = paused
