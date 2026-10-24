@@ -57,6 +57,7 @@ const EN = {
   'sk3.t': 'Research &amp; analysis',
   'sk3.p': 'Following digital traces, examining files and uncovering the structure behind what\'s visible.',
   'stack.label': 'TECHNOLOGIES',
+  'stack.sub': 'languages &amp; tech',
   'projects.h2': 'My open-source projects<span class="green">.</span>',
   'projects.p': 'Tools I\'ve built for file analysis, digital privacy, email and code security.',
   'link.allrepos': 'All repos <span aria-hidden="true">↗</span>',

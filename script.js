@@ -95,12 +95,13 @@ document.querySelectorAll('.glow-card').forEach(card => {
 });
 
 // Duplicate the technology list once so the marquee loops seamlessly.
-const marqueeTrack = document.querySelector('.marquee-track');
-for (const item of [...marqueeTrack.children]) {
-  const copy = item.cloneNode(true);
-  copy.setAttribute('aria-hidden', 'true');
-  marqueeTrack.append(copy);
-}
+document.querySelectorAll('.marquee-track').forEach(track => {
+  for (const item of [...track.children]) {
+    const copy = item.cloneNode(true);
+    copy.setAttribute('aria-hidden', 'true');
+    track.append(copy);
+  }
+});
 
 // Background terminal: an endless, softly blurred stream of analysis output.
 const terminalTrack = document.querySelector('.bg-terminal-track');
