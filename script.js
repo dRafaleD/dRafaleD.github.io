@@ -114,102 +114,6 @@ document.querySelectorAll('.marquee-track').forEach(track => {
   }
 });
 
-// Background terminal: an endless, softly blurred stream of analysis output.
-const terminalTrack = document.querySelector('.bg-terminal-track');
-const terminalSessions = [
-  ['asphdex scan ./samples/invoice_2024.exe', [
-    ['dim', '[*] PE32+ executable, 6 sections, 214 imports'],
-    ['dim', '[*] entropy  .text=6.41  .rdata=5.02  .rsrc=7.92'],
-    ['warn', '[!] packed section detected: .rsrc (UPX 3.96)'],
-    ['', '[+] yara: Suspicious_Imports_Injection matched'],
-    ['dim', '[+] imports: VirtualAllocEx, WriteProcessMemory, CreateRemoteThread'],
-    ['', '[✓] report written to ./reports/invoice_2024.json'],
-  ]],
-  ['repora audit ~/projects/api --secrets --history', [
-    ['dim', '[*] walking 1,284 files, 612 commits'],
-    ['warn', '[!] .env.production committed in 3f2a91c'],
-    ['warn', '[!] hardcoded token pattern in config/db.ts:14'],
-    ['dim', '[*] dependency review: 3 outdated, 0 known-vulnerable'],
-    ['', '[✓] 2 findings, 0 critical'],
-  ]],
-  ['fhnix inspect ./mail/urgent_payment.eml', [
-    ['dim', '[*] SPF=fail  DKIM=none  DMARC=reject'],
-    ['warn', '[!] reply-to domain differs from sender'],
-    ['warn', '[!] link text ≠ href: paypa1-secure.example'],
-    ['', '[✓] verdict: phishing (score 0.94)'],
-  ]],
-  ['trackher footprint --self --passive', [
-    ['dim', '[*] querying 42 public sources'],
-    ['', '[+] 7 accounts linked to handle'],
-    ['warn', '[!] email exposed in 2 public breach notices'],
-    ['', '[✓] privacy report generated'],
-  ]],
-  ['banshee triage ./logs/auth.log --offline', [
-    ['dim', '[*] parsed 18,331 lines'],
-    ['warn', '[!] 214 failed ssh logins from 3 addresses'],
-    ['', '[✓] evidence bundle sealed: sha256 9c1e…a07b'],
-  ]],
-  ['ravenscanner triage ./downloads/', [
-    ['dim', '[*] 37 files · 4 ELF · 2 scripts · 1 archive'],
-    ['warn', '[!] setup.sh: curl | sh pattern, base64 blob'],
-    ['', '[✓] 1 file flagged for manual review'],
-  ]],
-  ['stracespy summarize ./traces/app.strace', [
-    ['dim', '[*] 9,412 syscalls · 3 processes'],
-    ['warn', '[!] reads /etc/shadow (EACCES)'],
-    ['', '[+] outbound connect → 10.0.4.12:4444'],
-    ['', '[✓] behavior summary saved'],
-  ]],
-  ['sentinel timeline /mnt/evidence/disk.img', [
-    ['dim', '[*] MACB timeline: 48,201 entries'],
-    ['warn', '[!] mtime < crtime on /usr/bin/sshd'],
-    ['', '[✓] timeline.csv exported'],
-  ]],
-  ['flowscope analyze ./captures/lab.pcapng', [
-    ['dim', '[*] 12,880 packets · 214 flows'],
-    ['', '[+] TLS JA3 fingerprints: 9 unique'],
-    ['warn', '[!] beacon-like interval 60s ±2s → 203.0.113.7'],
-    ['', '[✓] risk score: 41 / 100'],
-  ]],
-  ['yara -r ./rules/asphdex ./samples', [
-    ['', 'Packer_UPX_Generic     ./samples/invoice_2024.exe'],
-    ['', 'Susp_PowerShell_Enc    ./samples/update.ps1'],
-  ]],
-  ['npiac build --out context.md', [
-    ['dim', '[*] 312 files indexed · 41k tokens'],
-    ['', '[✓] deterministic context written'],
-  ]],
-  ['sudo ufw status verbose', [
-    ['dim', 'Status: active'],
-    ['dim', 'Default: deny (incoming), allow (outgoing)'],
-  ]],
-];
-function terminalLine(kind, text) {
-  const line = document.createElement('div');
-  if (kind) line.className = kind;
-  line.textContent = text;
-  return line;
-}
-function buildTerminal() {
-  const fragment = document.createDocumentFragment();
-  let lines = 0;
-  for (const [command, output] of terminalSessions) {
-    const prompt = terminalLine('cmd', ` ${command}`);
-    const user = document.createElement('b');
-    user.textContent = 'root@drafaled:~/lab$';
-    prompt.prepend(user);
-    fragment.append(prompt);
-    output.forEach(([kind, text]) => fragment.append(terminalLine(kind, text)));
-    fragment.append(terminalLine('', ' '));
-    lines += output.length + 2;
-  }
-  // Two identical copies let the CSS animation loop without a visible seam.
-  terminalTrack.append(fragment.cloneNode(true), fragment);
-  terminalTrack.style.setProperty('--term-duration', `${lines * 1.5}s`);
-  terminalTrack.style.setProperty('--term-steps', String(lines));
-}
-buildTerminal();
-
 // Short glitch bursts every few seconds; the name joins in now and then.
 let glitchTimer = 0;
 function scheduleGlitch() {
@@ -283,6 +187,7 @@ function applyMotionPreference() {
   motionToggle.setAttribute('aria-pressed', String(paused));
   motionToggle.innerHTML = window.siteI18n.t(paused ? 'motion.play' : 'motion.pause');
   syncMascot();
+  syncScene();
 }
 motionToggle.addEventListener('click', () => {
   manuallyPaused = !manuallyPaused;
@@ -301,6 +206,13 @@ if ('IntersectionObserver' in window) {
     mascotVisible = entry.isIntersecting;
     syncMascot();
   }, { threshold: 0.15 }).observe(mascot);
+}
+
+// The background scene plays unless motion is reduced, paused by the visitor, or the tab is hidden.
+const bgScene = document.querySelector('.bg-scene');
+function syncScene() {
+  if (!manuallyPaused && !motionPreference.matches && !document.hidden) bgScene.play().catch(() => {});
+  else bgScene.pause();
 }
 
 motionPreference.addEventListener('change', applyMotionPreference);
