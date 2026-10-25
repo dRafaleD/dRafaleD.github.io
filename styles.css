@@ -437,3 +437,14 @@ nav{font-size:12px}
 /* Large screens: let the content column grow so cards do not look lost in the page. */
 @media(min-width:1500px){.container{width:min(1400px,calc(100% - 128px))}}
 @media(min-width:1800px){.container{width:min(1560px,calc(100% - 160px))}.about-copy{font-size:17px}.skill-card p,.project-content p,.repo-card p{font-size:16px}}
+
+/* Closing quote at the very bottom of the page. */
+.vigil{position:relative;z-index:1;margin:0;padding:64px 24px 90px;text-align:center}
+.vigil blockquote{margin:0}
+.vigil-quote{margin:0;font:600 clamp(24px,3.4vw,46px)/1.2 var(--heading);letter-spacing:-.03em;color:var(--text)}
+.vigil-quote::before{content:'“';margin-right:.12em;color:var(--green)}
+.vigil-quote::after{content:'”';margin-left:.08em;color:var(--green)}
+.vigil-tr{margin:14px 0 0;font:14px/1.7 var(--mono);color:var(--muted)}
+.vigil-tr:empty{display:none}
+.vigil figcaption{margin-top:22px;font:500 12px var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--green)}
+.vigil figcaption span{margin-right:8px;opacity:.6}

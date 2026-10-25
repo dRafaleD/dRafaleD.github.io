@@ -125,6 +125,7 @@ const EN = {
   'contact.li': 'LET\'S CONNECT',
   'mascot.aria': 'The dRafaleD mascot looking curiously at the screen',
   'mascot.note': 'Still scrolling… curious, aren\'t you?',
+  'quote.tr': '',
   'footer.top': 'Back to top <span aria-hidden="true">↑</span>',
   'motion.pause': '<span aria-hidden="true">Ⅱ</span> Pause animation',
   'motion.play': '<span aria-hidden="true">▷</span> Play animation',
