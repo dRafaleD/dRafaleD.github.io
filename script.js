@@ -25,17 +25,25 @@ if ('IntersectionObserver' in window) {
 // Update only on scroll or resize, with at most one write per animation frame.
 const sections = [...document.querySelectorAll("main section[id]")];
 const siteHeader = document.querySelector('.site-header');
+const progressBar = document.querySelector('.reading-progress');
 let activeSection = "";
 let progressFrame = 0;
+// Section positions are measured once (and when the layout changes), not on every scroll frame.
+let sectionTops = [];
+let pageHeight = 0;
+function measureSections() {
+  sectionTops = sections.map(section => ({ id: section.id, top: section.offsetTop }));
+  pageHeight = document.documentElement.scrollHeight;
+}
 function updateReadingProgress() {
   if (progressFrame) return;
   progressFrame = requestAnimationFrame(() => {
-    const available = document.documentElement.scrollHeight - window.innerHeight;
+    const available = pageHeight - window.innerHeight;
     const progress = available > 0 ? Math.min(1, Math.max(0, window.scrollY / available)) : 0;
-    document.documentElement.style.setProperty('--progress', String(progress));
+    progressBar.style.transform = `scaleX(${progress})`;
     siteHeader.classList.toggle('is-scrolled', window.scrollY > 12);
     const position = window.scrollY + window.innerHeight * 0.28;
-    const current = sections.filter(section => section.offsetTop <= position).at(-1)?.id || 'home';
+    const current = sectionTops.filter(section => section.top <= position).at(-1)?.id || 'home';
     if (current !== activeSection) {
       activeSection = current;
       for (const link of menuLinks) {
@@ -47,9 +55,12 @@ function updateReadingProgress() {
   });
 }
 window.addEventListener('scroll', updateReadingProgress, { passive: true });
-window.addEventListener('resize', updateReadingProgress);
-window.addEventListener('load', updateReadingProgress);
-updateReadingProgress();
+function remeasure() { measureSections(); updateReadingProgress(); }
+window.addEventListener('resize', remeasure);
+window.addEventListener('load', remeasure);
+window.addEventListener('langchange', remeasure);
+if ('ResizeObserver' in window) new ResizeObserver(remeasure).observe(document.body);
+remeasure();
 
 // Filters work locally; every project remains available without JavaScript.
 const projectCards = [...document.querySelectorAll('.project-card')];
@@ -194,7 +205,8 @@ function buildTerminal() {
   }
   // Two identical copies let the CSS animation loop without a visible seam.
   terminalTrack.append(fragment.cloneNode(true), fragment);
-  terminalTrack.style.setProperty('--term-duration', `${lines * 1.7}s`);
+  terminalTrack.style.setProperty('--term-duration', `${lines * 1.5}s`);
+  terminalTrack.style.setProperty('--term-steps', String(lines));
 }
 buildTerminal();
 
@@ -216,10 +228,24 @@ scheduleGlitch();
 
 // A soft light follows the pointer across the background.
 const cursorGlow = document.querySelector('.cursor-glow');
+let glowFrame = 0;
+let glowX = 0;
+let glowY = 0;
 window.addEventListener('pointermove', event => {
-  cursorGlow.style.setProperty('--cx', `${event.clientX}px`);
-  cursorGlow.style.setProperty('--cy', `${event.clientY}px`);
+  glowX = event.clientX;
+  glowY = event.clientY;
+  if (glowFrame) return;
+  glowFrame = requestAnimationFrame(() => {
+    cursorGlow.style.transform = `translate3d(${glowX}px,${glowY}px,0)`;
+    glowFrame = 0;
+  });
 }, { passive: true });
+
+// Pause the hero's looping animations once it has scrolled out of view.
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([entry]) => document.body.classList.toggle('hero-away', !entry.isIntersecting))
+    .observe(document.querySelector('.hero'));
+}
 
 // Repository filters, same behaviour as the featured project filters.
 const repoCards = [...document.querySelectorAll('.repo-card')];
