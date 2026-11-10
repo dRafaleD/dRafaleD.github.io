@@ -1,6 +1,6 @@
 # Eren Erdoğan — Kişisel tanıtım sitesi
 
-GitHub profilimdeki siyah, yeşil ve terminal temasından esinlenen Türkçe kişisel site. HTML, CSS ve JavaScript ile hazırlandı; derleme ya da paket kurulumu gerekmez.
+Siyah zemin, nötr gri kartlar, beyaz Manrope başlıklar ve sınırlı yeşil vurgular kullanan Türkçe kişisel site. Arka planda siber operatör GIF’i oynar; hareket azaltıldığında veya animasyon durdurulduğunda sabit kare gösterilir. HTML, CSS ve JavaScript ile hazırlandı; derleme ya da paket kurulumu gerekmez.
 
 ## Bilgisayarında aç
 

@@ -114,37 +114,6 @@ document.querySelectorAll('.marquee-track').forEach(track => {
   }
 });
 
-// Short glitch bursts every few seconds; the name joins in now and then.
-let glitchTimer = 0;
-function scheduleGlitch() {
-  clearTimeout(glitchTimer);
-  glitchTimer = setTimeout(() => {
-    if (!document.body.classList.contains('motion-paused') && !document.hidden) {
-      const withName = Math.random() < 0.35;
-      document.body.classList.add('is-glitching');
-      document.body.classList.toggle('glitch-name', withName);
-      setTimeout(() => document.body.classList.remove('is-glitching', 'glitch-name'), 450);
-    }
-    scheduleGlitch();
-  }, 3500 + Math.random() * 5000);
-}
-scheduleGlitch();
-
-// A soft light follows the pointer across the background.
-const cursorGlow = document.querySelector('.cursor-glow');
-let glowFrame = 0;
-let glowX = 0;
-let glowY = 0;
-window.addEventListener('pointermove', event => {
-  glowX = event.clientX;
-  glowY = event.clientY;
-  if (glowFrame) return;
-  glowFrame = requestAnimationFrame(() => {
-    cursorGlow.style.transform = `translate3d(${glowX}px,${glowY}px,0)`;
-    glowFrame = 0;
-  });
-}, { passive: true });
-
 // Pause the hero's looping animations once it has scrolled out of view.
 if ('IntersectionObserver' in window) {
   new IntersectionObserver(([entry]) => document.body.classList.toggle('hero-away', !entry.isIntersecting))
