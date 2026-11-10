@@ -172,12 +172,12 @@ repoButtons.forEach(button => {
 });
 document.querySelector('.repo-toolbar').hidden = false;
 
-// Respect the OS preference and offer an explicit pause for both original GIFs.
+// Respect the OS preference and offer an explicit pause for animated images.
 const motionToggle = document.querySelector('.motion-toggle');
 const animatedImages = [...document.querySelectorAll('img[data-animated]')];
 let manuallyPaused = false;
 function applyMotionPreference() {
-  const paused = manuallyPaused || motionPreference.matches;
+  const paused = manuallyPaused || motionPreference.matches || document.hidden;
   document.body.classList.toggle('motion-paused', paused);
   animatedImages.forEach(image => {
     const nextSource = paused ? image.dataset.still : image.dataset.animated;
@@ -187,7 +187,6 @@ function applyMotionPreference() {
   motionToggle.setAttribute('aria-pressed', String(paused));
   motionToggle.innerHTML = window.siteI18n.t(paused ? 'motion.play' : 'motion.pause');
   syncMascot();
-  syncScene();
 }
 motionToggle.addEventListener('click', () => {
   manuallyPaused = !manuallyPaused;
@@ -206,13 +205,6 @@ if ('IntersectionObserver' in window) {
     mascotVisible = entry.isIntersecting;
     syncMascot();
   }, { threshold: 0.15 }).observe(mascot);
-}
-
-// The background scene plays unless motion is reduced, paused by the visitor, or the tab is hidden.
-const bgScene = document.querySelector('.bg-scene');
-function syncScene() {
-  if (!manuallyPaused && !motionPreference.matches && !document.hidden) bgScene.play().catch(() => {});
-  else bgScene.pause();
 }
 
 motionPreference.addEventListener('change', applyMotionPreference);
